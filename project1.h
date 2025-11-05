@@ -2,6 +2,125 @@
 
 #define REG_COUNT 32
 
+typedef struct {
+	unsigned char opcode; // byte 0
+	unsigned char byte1;
+	unsigned char byte2;
+	unsigned char byte3;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+} IF_TO_ID_reg;
+
+typedef struct {
+	unsigned char opcode;
+	int destination_reg;
+	int reg_operand1;
+	int reg_operand2;
+	int immediate_val;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+} ID_TO_IA_reg;
+
+typedef struct {
+	unsigned char opcode;
+	int destination_reg;
+	int reg_operand1;
+	int reg_operand2;
+	// int value_in_reg1;
+	// int value_in_reg2;
+	int immediate_val;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+	int result;
+} IA_TO_EX1_reg;
+
+// typedef struct {
+// 	unsigned char opcode;
+// 	int destination_reg;
+// 	int reg_operand1;
+// 	int reg_operand2;
+// 	int immediate_val;
+// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+// 	int result;
+// } IA_TO_EX2_reg;
+
+// typedef struct {
+// 	unsigned char opcode;
+// 	int destination_reg;
+// 	int reg_operand1;
+// 	int reg_operand2;
+// 	int value_in_reg1;
+// 	int value_in_reg2;
+// 	int immediate_val;
+// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+// 	int result;
+// } EX1_TO_MEM1_reg;
+
+// typedef struct {
+// 	unsigned char opcode;
+// 	int destination_reg;
+// 	int reg_operand1;
+// 	int reg_operand2;
+// 	int value_in_reg1;
+// 	int value_in_reg2;
+// 	int immediate_val;
+// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+// 	int result;
+// 	int counted;
+// } EX1_TO_WB_reg;
+
+typedef struct {
+	unsigned char opcode;
+	int destination_reg;
+	int reg_operand1;
+	int reg_operand2;
+	int value_in_reg1;
+	int value_in_reg2;
+	int immediate_val;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+	int result;
+} EX1_TO_EX2_reg;
+
+// typedef struct {
+// 	unsigned char opcode;
+// 	int destination_reg;
+// 	int reg_operand1;
+// 	int reg_operand2;
+// 	int immediate_val;
+// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+// 	int result;
+// } EX2_TO_WB_reg;
+
+typedef struct {
+	unsigned char opcode;
+	int destination_reg;
+	int reg_operand1;
+	int reg_operand2;
+	int value_in_reg1;
+	int value_in_reg2;
+	int immediate_val;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+	int result;
+} EX2_TO_MEM1_reg;
+
+typedef struct {
+	unsigned char opcode;
+	int destination_reg;
+	int reg_operand1;
+	int reg_operand2;
+	int immediate_val;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+	int result;
+} MEM1_TO_MEM2_reg;
+
+typedef struct {
+	unsigned char opcode;
+	int destination_reg;
+	int reg_operand1;
+	int reg_operand2;
+	int immediate_val;
+	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
+	int result;
+	int counted;
+} MEM2_TO_WB_reg;
+
 typedef struct
 {
     int registers[REG_COUNT];
@@ -10,6 +129,8 @@ typedef struct
 	int inst_count;
 	int execution_time;
     int pc;
+	int cycles;
+	int pull_no_more_instr;
 
 	int set_count;
 	int add_count;
@@ -19,98 +140,25 @@ typedef struct
 	int ld_count;
 	int sd_count;
 
+	IF_TO_ID_reg if_to_id_reg;
+	ID_TO_IA_reg id_to_ia_reg;
+	IA_TO_EX1_reg ia_to_ex1_reg;
+	EX1_TO_EX2_reg ex1_to_ex2_reg;
+	EX2_TO_MEM1_reg ex2_to_mem1_reg;
+	// IA_TO_EX2_reg ia_to_ex2_reg;
+	// EX1_TO_MEM1_reg ex1_to_mem1_reg;
+	// EX1_TO_WB_reg ex1_to_wb_reg;
+	// EX2_TO_WB_reg ex2_to_wb_reg;
+	MEM1_TO_MEM2_reg mem1_to_mem2_reg;
+	MEM2_TO_WB_reg mem2_to_wb_reg;
+
 	// 64KB = 65536 bytes of data
     unsigned char memory[65536];
 	int program_ended;
 
 } Simple_Pipe;
 
-struct {
-	unsigned char opcode; // byte 0
-	unsigned char byte1;
-	unsigned char byte2;
-	unsigned char byte3;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-} if_to_id_reg;
 
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-} id_to_ia_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} ia_to_ex1_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} ia_to_ex2_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} ex1_to_mem1_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} ex1_to_wb_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} ex2_to_wb_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} mem1_to_mem2_reg;
-
-struct {
-	unsigned char opcode;
-	int destination_reg;
-	int reg_operand1;
-	int reg_operand2;
-	int immediate_val;
-	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-	int result;
-} mem2_to_wb_reg;
 
 void IF_stage(Simple_Pipe* cpu);
 void ID_stage(Simple_Pipe* cpu);

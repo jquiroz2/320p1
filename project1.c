@@ -215,7 +215,7 @@ void IA_stage(Simple_Pipe* cpu) {
     // checking ex1 stage
     if(cpu->ia_to_ex1_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
         if((register_operand1 == cpu->ia_to_ex1_reg.destination_reg) || (register_operand2 == cpu->ia_to_ex1_reg.destination_reg)) {
-            printf("IA STALL\n");
+            printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
@@ -223,28 +223,28 @@ void IA_stage(Simple_Pipe* cpu) {
 
     if(cpu->ex1_to_ex2_reg.valid && cpu->ex1_to_ex2_reg.destination_reg != -1) {
         if((register_operand1 == cpu->ex1_to_ex2_reg.destination_reg) || (register_operand2 == cpu->ex1_to_ex2_reg.destination_reg)) {
-            printf("IA STALL\n");
+            printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
     if(cpu->ex2_to_mem1_reg.valid && cpu->ex2_to_mem1_reg.destination_reg != -1) {
         if((register_operand1 == cpu->ex2_to_mem1_reg.destination_reg) || (register_operand2 == cpu->ex2_to_mem1_reg.destination_reg)) {
-            printf("IA STALL\n");
+            printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
     if(cpu->mem1_to_mem2_reg.valid && cpu->mem1_to_mem2_reg.destination_reg != -1) {
         if((register_operand1 == cpu->mem1_to_mem2_reg.destination_reg) || (register_operand2 == cpu->mem1_to_mem2_reg.destination_reg)) {
-            printf("IA STALL\n");
+            printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
     if(cpu->mem2_to_wb_reg.valid && cpu->mem2_to_wb_reg.destination_reg != -1) {
         if((register_operand1 == cpu->mem2_to_wb_reg.destination_reg) || (register_operand2 == cpu->mem2_to_wb_reg.destination_reg)) {
-            printf("IA STALL\n");
+            printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
@@ -510,7 +510,7 @@ void WB_stage(Simple_Pipe* cpu) {
     }
 
     if(cpu->cycles > 4 && !cpu->pull_no_more_instr) {
-        cpu->data_hazard_count++;
+        //cpu->data_hazard_count++;
         printf("WB STALL\n");
     }
     printf("current instruction in WB stage: 0x%02X %d %d %d %d %d\n", cpu->mem2_to_wb_reg.opcode, cpu->mem2_to_wb_reg.destination_reg, cpu->mem2_to_wb_reg.reg_operand1, cpu->mem2_to_wb_reg.reg_operand2, cpu->mem2_to_wb_reg.immediate_val, cpu->mem2_to_wb_reg.result);
@@ -576,6 +576,7 @@ void print_regs(Simple_Pipe simple_pipe)
     printf("\n");
     
     printf("Total execution cycles: %d\n", simple_pipe.execution_time);
+    printf("Total instruction simulated: %d\n", simple_pipe.inst_count);
     printf("IPC: %f\n", ((double)simple_pipe.inst_count / simple_pipe.execution_time) );
 }
 
@@ -632,8 +633,6 @@ int main(int argc, char *argv[]) {
     my_cpu.id_to_ia_reg.reg_operand2 = 0;
     my_cpu.id_to_ia_reg.immediate_val = 0;
     my_cpu.id_to_ia_reg.valid = 0;
-    // my_cpu.id_to_ia_reg.value_in_reg1 = 0;
-    // my_cpu.id_to_ia_reg.value_in_reg2 = 0;
 
     my_cpu.ia_to_ex1_reg.opcode = 0;
     my_cpu.ia_to_ex1_reg.destination_reg = 0;
@@ -642,8 +641,6 @@ int main(int argc, char *argv[]) {
     my_cpu.ia_to_ex1_reg.immediate_val = 0;
     my_cpu.ia_to_ex1_reg.valid = 0;
     my_cpu.ia_to_ex1_reg.result = 0;
-    // my_cpu.ia_to_ex1_reg.value_in_reg1 = 0;
-    // my_cpu.ia_to_ex1_reg.value_in_reg2 = 0;
 
     my_cpu.ex1_to_ex2_reg.opcode = 0;
     my_cpu.ex1_to_ex2_reg.destination_reg = 0;
@@ -706,29 +703,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // for(int i =0; i<20; i++) {
-    //     printf("btye: 0x%02X \n", my_cpu.memory[i]);
-    // }
-
     fclose(fp);
 
-    // printf("%02X", my_cpu.memory[0]);
-    // printf("%02X", my_cpu.memory[1]);
-    // printf("%02X", my_cpu.memory[2]);
-    // printf("%02X", my_cpu.memory[3]);
-    // printf("\n");
-    // printf("%02X", my_cpu.memory[4]);
-    // printf("%02X", my_cpu.memory[5]);
-    // printf("%02X", my_cpu.memory[6]);
-    // printf("%02X", my_cpu.memory[7]);
-    // printf("\n");
-    // printf("%02X", my_cpu.memory[8]);
-    // printf("%02X", my_cpu.memory[9]);
-    // printf("%02X", my_cpu.memory[10]);
-    // printf("%02X", my_cpu.memory[11]);
-
-
-    //int cycle = 0;
     while(pipeline_has_instructions(&my_cpu) || my_cpu.cycles == 0) {
         my_cpu.cycles++;
         printf("cycle number: %d----------\n", my_cpu.cycles);
@@ -744,14 +720,6 @@ int main(int argc, char *argv[]) {
     }
     my_cpu.execution_time = my_cpu.cycles;
     print_regs(my_cpu);
-
-
-    // for(int i=0; i<5; i++) {
-    //     printf("cycle %d ------------\n", i);
-    //     IA_stage(&my_cpu);
-    //     ID_stage(&my_cpu);
-    //     IF_stage(&my_cpu);
-    // }
    
     return 0;
 }

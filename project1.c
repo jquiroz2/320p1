@@ -1,5 +1,6 @@
+// note to grader: LD and SD not working properly - idk what 'memory' is in this case/ how to load from and store into it
+    // so input files 5 and 6 dont work
 #include "project1.h"
-
 
 void IF_stage(Simple_Pipe* cpu) {
     // program is over
@@ -9,7 +10,7 @@ void IF_stage(Simple_Pipe* cpu) {
     
     // need to stall
     if(cpu->if_to_id_reg.valid) {
-        printf("IF STALL\n");
+        //printf("IF STALL\n");
         return; 
     }
 
@@ -28,8 +29,8 @@ void IF_stage(Simple_Pipe* cpu) {
 
     
 
-    printf("current instruction in IF stage: ");
-    printf("0x%02X %d %d %d\n", cpu->if_to_id_reg.opcode, cpu->if_to_id_reg.byte1, cpu->if_to_id_reg.byte2, cpu->if_to_id_reg.byte3);
+    //printf("current instruction in IF stage: ");
+    //printf("0x%02X %d %d %d\n", cpu->if_to_id_reg.opcode, cpu->if_to_id_reg.byte1, cpu->if_to_id_reg.byte2, cpu->if_to_id_reg.byte3);
     if(opcode == 0x70) {
         cpu->pull_no_more_instr = 1;
         return;
@@ -41,7 +42,7 @@ void IF_stage(Simple_Pipe* cpu) {
     // printf("current instruction byte3: 0x%02X \n", byte3);
 
     cpu->pc += 4;
-    printf("new pc: %d", cpu->pc);
+    //printf("new pc: %d", cpu->pc);
 }
 
 void ID_stage(Simple_Pipe* cpu) {
@@ -61,6 +62,9 @@ void ID_stage(Simple_Pipe* cpu) {
         case 0x00:
             cpu->id_to_ia_reg.destination_reg = cpu->if_to_id_reg.byte1;
             cpu->id_to_ia_reg.immediate_val = (cpu->if_to_id_reg.byte2 << 8) | cpu->if_to_id_reg.byte3;
+            // if (cpu->id_to_ia_reg.immediate_val & 0x8000) {
+            //     cpu->id_to_ia_reg.immediate_val |= 0xFFFF0000;
+            // }
             cpu->id_to_ia_reg.reg_operand1 = -1;
             cpu->id_to_ia_reg.reg_operand2 = -1;
             cpu->id_to_ia_reg.valid = 1;
@@ -118,6 +122,7 @@ void ID_stage(Simple_Pipe* cpu) {
             cpu->id_to_ia_reg.destination_reg = cpu->if_to_id_reg.byte1;
             cpu->id_to_ia_reg.reg_operand1 = cpu->if_to_id_reg.byte2;
             cpu->id_to_ia_reg.immediate_val = cpu->if_to_id_reg.byte3;
+            //printf("immedaite val for dic: %d\n", cpu->id_to_ia_reg.immediate_val);
             cpu->id_to_ia_reg.reg_operand2 = -1;
             cpu->id_to_ia_reg.valid = 1;
             break;
@@ -136,17 +141,17 @@ void ID_stage(Simple_Pipe* cpu) {
             cpu->id_to_ia_reg.valid = 1;
             break;
         case 0x60:
-            cpu->id_to_ia_reg.destination_reg = cpu->if_to_id_reg.byte1;
+            cpu->id_to_ia_reg.destination_reg = -1;
+            cpu->id_to_ia_reg.reg_operand1 = cpu->if_to_id_reg.byte1;
             cpu->id_to_ia_reg.immediate_val = (cpu->if_to_id_reg.byte2 << 8) | cpu->if_to_id_reg.byte3;
-            cpu->id_to_ia_reg.reg_operand1 = -1;
             cpu->id_to_ia_reg.reg_operand2 = -1;
             cpu->id_to_ia_reg.valid = 1;
             break;
         case 0x61:
-            cpu->id_to_ia_reg.destination_reg = cpu->if_to_id_reg.byte1;
-            cpu->id_to_ia_reg.reg_operand1 = cpu->if_to_id_reg.byte2;
-            cpu->id_to_ia_reg.reg_operand2 = cpu->if_to_id_reg.byte3;
-            cpu->id_to_ia_reg.immediate_val = -1;
+            cpu->id_to_ia_reg.destination_reg = -1;
+            cpu->id_to_ia_reg.reg_operand1 = cpu->if_to_id_reg.byte1;
+            cpu->id_to_ia_reg.reg_operand2 = cpu->if_to_id_reg.byte2;
+            cpu->id_to_ia_reg.immediate_val = cpu->if_to_id_reg.byte3;
             cpu->id_to_ia_reg.valid = 1;
             break;
         case 0x70:
@@ -158,8 +163,8 @@ void ID_stage(Simple_Pipe* cpu) {
             break;
     }
 
-    printf("current instruction in ID stage: ");
-    printf("0x%02X %d %d %d %d\n", cpu->id_to_ia_reg.opcode, cpu->id_to_ia_reg.destination_reg, cpu->id_to_ia_reg.reg_operand1, cpu->id_to_ia_reg.reg_operand2, cpu->id_to_ia_reg.immediate_val);
+    //printf("current instruction in ID stage: ");
+    //printf("0x%02X %d %d %d %d\n", cpu->id_to_ia_reg.opcode, cpu->id_to_ia_reg.destination_reg, cpu->id_to_ia_reg.reg_operand1, cpu->id_to_ia_reg.reg_operand2, cpu->id_to_ia_reg.immediate_val);
     
     // cpu->id_to_ia_reg.valid = 1;
 
@@ -182,31 +187,13 @@ void IA_stage(Simple_Pipe* cpu) {
     }
 
     unsigned char opcode = cpu->id_to_ia_reg.opcode;
-    printf("current instruction in IA stage:--------------------");
+    //printf("current instruction in IA stage:--------------------");
     // printf("opcode: %d\n", cpu->id_to_ia_reg.opcode);
 
-    printf("0x%02X %d %d %d %d\n", cpu->id_to_ia_reg.opcode, cpu->id_to_ia_reg.destination_reg, cpu->id_to_ia_reg.reg_operand1, cpu->id_to_ia_reg.reg_operand2, cpu->id_to_ia_reg.immediate_val);
+    //printf("0x%02X %d %d %d %d\n", cpu->id_to_ia_reg.opcode, cpu->id_to_ia_reg.destination_reg, cpu->id_to_ia_reg.reg_operand1, cpu->id_to_ia_reg.reg_operand2, cpu->id_to_ia_reg.immediate_val);
     // printf("register operand 1: %d\n", cpu->id_to_ia_reg.reg_operand1);
     // printf("register operand 2: %d\n", cpu->id_to_ia_reg.reg_operand2);
     // printf("immediate value: %d\n", cpu->id_to_ia_reg.immediate_val);
-
-
-    // int ex1_is_next_stage = (opcode == 0x00 || opcode == 0x10 || opcode == 0x11 || opcode == 0x20 || opcode == 0x21);
-    // int ex2_is_next_stage = (opcode == 0x30 || opcode == 0x31 || opcode == 0x40 || opcode == 0x41); 
-    // int is_a_memory_instr = (opcode == 0x50 || opcode == 0x51 || opcode == 0x60 || opcode == 0x61);
-
-    // if(ex1_is_next_stage && cpu->ia_to_ex1_reg.valid) {
-    //     printf("stalling\n");
-    //     return; // we need to stall
-    // }
-    // if(ex2_is_next_stage && cpu->ia_to_ex2_reg.valid) {
-    //     printf("stalling\n");
-    //     return; // we need to stall
-    // }
-    // if(is_a_memory_instr && cpu->ia_to_ex1_reg.valid) {
-    //     printf("stalling\n");
-    //     return; // stalling
-    // }
 
     // check for data dependencies
     int register_operand1 = cpu->id_to_ia_reg.reg_operand1;
@@ -215,7 +202,7 @@ void IA_stage(Simple_Pipe* cpu) {
     // checking ex1 stage
     if(cpu->ia_to_ex1_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
         if((register_operand1 == cpu->ia_to_ex1_reg.destination_reg) || (register_operand2 == cpu->ia_to_ex1_reg.destination_reg)) {
-            printf("IA STALL for opcode: 0x%02X\n", opcode);
+            //printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
@@ -223,38 +210,97 @@ void IA_stage(Simple_Pipe* cpu) {
 
     if(cpu->ex1_to_ex2_reg.valid && cpu->ex1_to_ex2_reg.destination_reg != -1) {
         if((register_operand1 == cpu->ex1_to_ex2_reg.destination_reg) || (register_operand2 == cpu->ex1_to_ex2_reg.destination_reg)) {
-            printf("IA STALL for opcode: 0x%02X\n", opcode);
+            //printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
     if(cpu->ex2_to_mem1_reg.valid && cpu->ex2_to_mem1_reg.destination_reg != -1) {
         if((register_operand1 == cpu->ex2_to_mem1_reg.destination_reg) || (register_operand2 == cpu->ex2_to_mem1_reg.destination_reg)) {
-            printf("IA STALL for opcode: 0x%02X\n", opcode);
+            //printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
     if(cpu->mem1_to_mem2_reg.valid && cpu->mem1_to_mem2_reg.destination_reg != -1) {
         if((register_operand1 == cpu->mem1_to_mem2_reg.destination_reg) || (register_operand2 == cpu->mem1_to_mem2_reg.destination_reg)) {
-            printf("IA STALL for opcode: 0x%02X\n", opcode);
+            //printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
     if(cpu->mem2_to_wb_reg.valid && cpu->mem2_to_wb_reg.destination_reg != -1) {
         if((register_operand1 == cpu->mem2_to_wb_reg.destination_reg) || (register_operand2 == cpu->mem2_to_wb_reg.destination_reg)) {
-            printf("IA STALL for opcode: 0x%02X\n", opcode);
+            //printf("IA STALL for opcode: 0x%02X\n", opcode);
             cpu->data_hazard_count++;
             return; // needs a stall
         }
     }
 
-    // if it hasn't returned by here, no dependencies
-    
-    
+    if(opcode == 0x61) {
+        int Rx = cpu->id_to_ia_reg.reg_operand1;   // data to store
+        int Ry = cpu->id_to_ia_reg.reg_operand2;   // address base
+        int Rz = cpu->id_to_ia_reg.immediate_val; 
+        int sources[3] = {Rx, Ry, Rz};
 
-    
+        // check IA->EX1 stage
+        if(cpu->ia_to_ex1_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
+            for(int i = 0; i < 3; i++) {
+                if(sources[i] == cpu->ia_to_ex1_reg.destination_reg) {
+                    //printf("IA STALL for sd due to dependency on R%d in IA->EX1\n", sources[i]);
+                    cpu->data_hazard_count++;
+                    return; // stall
+                }
+            }
+        }
+
+        // check EX1->EX2 stage
+        if(cpu->ex1_to_ex2_reg.valid && cpu->ex1_to_ex2_reg.destination_reg != -1) {
+            for(int i = 0; i < 3; i++) {
+                if(sources[i] == cpu->ex1_to_ex2_reg.destination_reg) {
+                    //printf("IA STALL for sd due to dependency on R%d in EX1->EX2\n", sources[i]);
+                    cpu->data_hazard_count++;
+                    return; // stall
+                }
+            }
+        }
+
+        // check EX2->MEM1 stage
+        if(cpu->ex2_to_mem1_reg.valid && cpu->ex2_to_mem1_reg.destination_reg != -1) {
+            for(int i = 0; i < 3; i++) {
+                if(sources[i] == cpu->ex2_to_mem1_reg.destination_reg) {
+                    //printf("IA STALL for sd due to dependency on R%d in EX2->MEM1\n", sources[i]);
+                    cpu->data_hazard_count++;
+                    return; // stall
+                }
+            }
+        }
+
+        // check MEM1->MEM2 stage
+        if(cpu->mem1_to_mem2_reg.valid && cpu->mem1_to_mem2_reg.destination_reg != -1) {
+            for(int i = 0; i < 3; i++) {
+                if(sources[i] == cpu->mem1_to_mem2_reg.destination_reg) {
+                    //printf("IA STALL for sd due to dependency on R%d in MEM1->MEM2\n", sources[i]);
+                    cpu->data_hazard_count++;
+                    return; // stall
+                }
+            }
+        }
+
+        // check MEM2->WB stage
+        if(cpu->mem2_to_wb_reg.valid && cpu->mem2_to_wb_reg.destination_reg != -1) {
+            for(int i = 0; i < 3; i++) {
+                if(sources[i] == cpu->mem2_to_wb_reg.destination_reg) {
+                    //printf("IA STALL for sd due to dependency on R%d in MEM2->WB\n", sources[i]);
+                    cpu->data_hazard_count++;
+                    return; // stall
+                }
+            }
+        }
+    }
+
+    // if it hasn't returned by here, no dependencies
+
     cpu->ia_to_ex1_reg.opcode = cpu->id_to_ia_reg.opcode;
     cpu->ia_to_ex1_reg.destination_reg = cpu->id_to_ia_reg.destination_reg;
     cpu->ia_to_ex1_reg.reg_operand1 = cpu->id_to_ia_reg.reg_operand1;
@@ -277,76 +323,42 @@ void EX1_stage(Simple_Pipe* cpu) {
     }
 
     if(cpu->ex1_to_ex2_reg.valid) {
-        printf("EX1 stall b/c ex2 not empty\n");
+        //printf("EX1 stall b/c ex2 not empty\n");
         return;
     }
     
     unsigned char opcode = cpu->ia_to_ex1_reg.opcode;
-
-
     
     //unsigned int result;
-    printf("now we in EX1 stage:\n");
-    printf("current instruction in EX1 stage: 0x%02X %d %d %d %d\n", cpu->ia_to_ex1_reg.opcode, cpu->ia_to_ex1_reg.destination_reg, cpu->ia_to_ex1_reg.reg_operand1, cpu->ia_to_ex1_reg.reg_operand2, cpu->ia_to_ex1_reg.immediate_val);
+    //printf("now we in EX1 stage:\n");
+    //printf("current instruction in EX1 stage: 0x%02X %d %d %d %d\n", cpu->ia_to_ex1_reg.opcode, cpu->ia_to_ex1_reg.destination_reg, cpu->ia_to_ex1_reg.reg_operand1, cpu->ia_to_ex1_reg.reg_operand2, cpu->ia_to_ex1_reg.immediate_val);
 
     // // need to check for data hazards here!!
     int register_operand1 = cpu->ia_to_ex1_reg.reg_operand1;
     int register_operand2 = cpu->ia_to_ex1_reg.reg_operand2;
-
-
-    // // checking ex1
-    // if(cpu->ex1_to_ex2_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
-    //     if((register_operand1 == cpu->ex1_to_ex2_reg.destination_reg) || (register_operand2 == cpu->ex1_to_ex2_reg.destination_reg)) {
-    //         printf("EX1 STALL b/c data hazard\n");
-    //         cpu->data_hazard_count++;
-    //         return; // needs a stall
-    //     }
-    // }
-    // // checking ex2
-    // if(cpu->ex2_to_mem1_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
-    //     if((register_operand1 == cpu->ex2_to_mem1_reg.destination_reg) || (register_operand2 == cpu->ex2_to_mem1_reg.destination_reg)) {
-    //         printf("EX1 STALL b/c data hazard\n");
-    //         cpu->data_hazard_count++;
-    //         return; // needs a stall
-    //     }
-    // }
-    // // checking mem1
-    // if(cpu->mem1_to_mem2_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
-    //     if((register_operand1 == cpu->mem1_to_mem2_reg.destination_reg) || (register_operand2 == cpu->mem1_to_mem2_reg.destination_reg)) {
-    //         printf("EX1 STALL b/c data hazard\n");
-    //         cpu->data_hazard_count++;
-    //         return; // needs a stall
-    //     }
-    // }
-    // //  checking mem2
-    // if(cpu->mem2_to_wb_reg.valid && cpu->ia_to_ex1_reg.destination_reg != -1) {
-    //     if((register_operand1 == cpu->mem2_to_wb_reg.destination_reg) || (register_operand2 == cpu->mem2_to_wb_reg.destination_reg)) {
-    //         printf("EX1 STALL b/c data hazard\n");
-    //         cpu->data_hazard_count++;
-    //         return; // needs a stall
-    //     }
-    // }
+    //printf("register op 1: %d\n", register_operand1);
+    //printf("register op 1: %d\n", register_operand2);
     
-
     if(cpu->ia_to_ex1_reg.reg_operand1 != -1) {
         cpu->ex1_to_ex2_reg.value_in_reg1 = cpu->registers[register_operand1];
+        //printf("value  num 1: %d\n", cpu->ex1_to_ex2_reg.value_in_reg1);
     }
 
     if(cpu->ia_to_ex1_reg.reg_operand2 != -1) {
         cpu->ex1_to_ex2_reg.value_in_reg2 = cpu->registers[register_operand2];
     }
 
-
     switch(opcode) {
         case 0x00:
             cpu->ia_to_ex1_reg.result = cpu->ia_to_ex1_reg.immediate_val;
+            //printf("imm value: %d\n", cpu->ia_to_ex1_reg.immediate_val);
             break;
         case 0x10:
             cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 + cpu->ex1_to_ex2_reg.value_in_reg2;
             break;
         case 0x11:
             cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 + cpu->ia_to_ex1_reg.immediate_val;
-            printf("value in reg operand 1: %d\n", cpu->ex1_to_ex2_reg.value_in_reg1);
+            //printf("value in reg operand 1: %d\n", cpu->ex1_to_ex2_reg.value_in_reg1);
             break;
         case 0x20:
             cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 - cpu->ex1_to_ex2_reg.value_in_reg2;
@@ -355,16 +367,26 @@ void EX1_stage(Simple_Pipe* cpu) {
             cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 - cpu->ia_to_ex1_reg.immediate_val;
             break;
         case 0x50:
-            cpu->ia_to_ex1_reg.result = cpu->ia_to_ex1_reg.immediate_val;
+            cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.immediate_val;
+            //cpu->ia_to_ex1_reg.immediate_val;
             break;
         case 0x51:
+            // result is the index of memory we need
             cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 + cpu->ex1_to_ex2_reg.value_in_reg2;
             break;
         case 0x60:
             cpu->ia_to_ex1_reg.result = cpu->ia_to_ex1_reg.immediate_val;
             break;
         case 0x61:
-            cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 + cpu->ex1_to_ex2_reg.value_in_reg2;
+            cpu->ia_to_ex1_reg.result = cpu->ex1_to_ex2_reg.value_in_reg2 + cpu->registers[cpu->ia_to_ex1_reg.immediate_val];
+            cpu->ia_to_ex1_reg.store_value = cpu->registers[cpu->ia_to_ex1_reg.reg_operand1];
+            //printf("!!val1: %d sceond val: %d\n", cpu->ex1_to_ex2_reg.value_in_reg2, cpu->registers[cpu->ia_to_ex1_reg.immediate_val]);
+            //printf("sd: storing R%d (value=%d) to address (R%d + R%d) = %d\n", 
+            // cpu->ia_to_ex1_reg.reg_operand1, 
+            // cpu->ex1_to_ex2_reg.store_value,
+            // cpu->ia_to_ex1_reg.reg_operand2,
+            // cpu->ia_to_ex1_reg.immediate_val,
+            // cpu->ia_to_ex1_reg.result);
             break;
         case 0x70:
             break;
@@ -375,16 +397,15 @@ void EX1_stage(Simple_Pipe* cpu) {
     cpu->ex1_to_ex2_reg.destination_reg = cpu->ia_to_ex1_reg.destination_reg;
     cpu->ex1_to_ex2_reg.reg_operand1 = cpu->ia_to_ex1_reg.reg_operand1;
     cpu->ex1_to_ex2_reg.reg_operand2 = cpu->ia_to_ex1_reg.reg_operand2;
-    // cpu->ex1_to_ex2_reg.value_in_reg1 = cpu->ia_to_ex1_reg.value_in_reg1;
+    //cpu->ex1_to_ex2_reg.value_in_reg1 = cpu->ia_to_ex1_reg.value_in_reg1;
     // cpu->ex1_to_ex2_reg.value_in_reg2 = cpu->ia_to_ex1_reg.value_in_reg2;
     cpu->ex1_to_ex2_reg.immediate_val = cpu->ia_to_ex1_reg.immediate_val;
     cpu->ex1_to_ex2_reg.opcode = cpu->ia_to_ex1_reg.opcode;
     cpu->ex1_to_ex2_reg.result = cpu->ia_to_ex1_reg.result;
+    cpu->ex1_to_ex2_reg.store_value = cpu->ia_to_ex1_reg.store_value;
     cpu->ex1_to_ex2_reg.valid = 1;
 
     cpu->ia_to_ex1_reg.valid = 0;
-    
-    
 }
 
 void EX2_stage(Simple_Pipe* cpu) {
@@ -392,23 +413,23 @@ void EX2_stage(Simple_Pipe* cpu) {
         return;
     }
     if(cpu->ex2_to_mem1_reg.valid) {
-        printf("EX2 stall b/c mem1 not ready for new instr\n");
+        //printf("EX2 stall b/c mem1 not ready for new instr\n");
         return;
     }
-    printf("current instruction in EX2 stage: 0x%02X %d %d %d %d %d\n", cpu->ex1_to_ex2_reg.opcode, cpu->ex1_to_ex2_reg.destination_reg, cpu->ex1_to_ex2_reg.reg_operand1, cpu->ex1_to_ex2_reg.reg_operand2, cpu->ex1_to_ex2_reg.immediate_val, cpu->ex1_to_ex2_reg.result);
+    //printf("current instruction in EX2 stage: 0x%02X %d %d %d %d %d\n", cpu->ex1_to_ex2_reg.opcode, cpu->ex1_to_ex2_reg.destination_reg, cpu->ex1_to_ex2_reg.reg_operand1, cpu->ex1_to_ex2_reg.reg_operand2, cpu->ex1_to_ex2_reg.immediate_val, cpu->ex1_to_ex2_reg.result);
 
     unsigned char opcode = cpu->ex1_to_ex2_reg.opcode;
-    //unsigned int result = 0;
     switch(opcode) {
         case 0x30:
-            cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.reg_operand1 * cpu->ex1_to_ex2_reg.reg_operand2;
+            cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 * cpu->ex1_to_ex2_reg.value_in_reg2;
             break;
         case 0x31:
-            cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.reg_operand1 * cpu->ex1_to_ex2_reg.immediate_val;
+            cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 * cpu->ex1_to_ex2_reg.immediate_val;
+            //printf("immediate value: %d\n", cpu->ex1_to_ex2_reg.immediate_val);
             break;
         case 0x40:
             if(cpu->ex1_to_ex2_reg.reg_operand2 != 0) {
-                cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.reg_operand1 / cpu->ex1_to_ex2_reg.reg_operand2;
+                cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 / cpu->ex1_to_ex2_reg.value_in_reg2;
             }
             else {
                 cpu->ex1_to_ex2_reg.result = 0;
@@ -416,7 +437,8 @@ void EX2_stage(Simple_Pipe* cpu) {
             break;
         case 0x41:
             if(cpu->ex1_to_ex2_reg.immediate_val != 0) {
-                cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.reg_operand1 / cpu->ex1_to_ex2_reg.immediate_val;
+                //printf("imm val  num : %d\n", cpu->ex1_to_ex2_reg.immediate_val);
+                cpu->ex1_to_ex2_reg.result = cpu->ex1_to_ex2_reg.value_in_reg1 / cpu->ex1_to_ex2_reg.immediate_val;
             }
             else {
                 cpu->ex1_to_ex2_reg.result = 0;
@@ -431,6 +453,7 @@ void EX2_stage(Simple_Pipe* cpu) {
     cpu->ex2_to_mem1_reg.opcode = cpu->ex1_to_ex2_reg.opcode;
     cpu->ex2_to_mem1_reg.immediate_val = cpu->ex1_to_ex2_reg.immediate_val;
     cpu->ex2_to_mem1_reg.result = cpu->ex1_to_ex2_reg.result;
+    cpu->ex2_to_mem1_reg.store_value = cpu->ex1_to_ex2_reg.store_value;
 
     cpu->ex2_to_mem1_reg.valid = 1;
 
@@ -442,17 +465,20 @@ void MEM1_stage(Simple_Pipe* cpu) {
         return;
     }
     if(cpu->mem1_to_mem2_reg.valid) {
-        printf("MEM1 STALL\n");
+        //printf("MEM1 STALL\n");
         return;
     }
-    printf("current instruction in MEM1 stage: 0x%02X %d %d %d %d %d\n", cpu->ex2_to_mem1_reg.opcode, cpu->ex2_to_mem1_reg.destination_reg, cpu->ex2_to_mem1_reg.reg_operand1, cpu->ex2_to_mem1_reg.reg_operand2, cpu->ex2_to_mem1_reg.immediate_val, cpu->ex2_to_mem1_reg.result);
+    //printf("current instruction in MEM1 stage: 0x%02X %d %d %d %d %d\n", cpu->ex2_to_mem1_reg.opcode, cpu->ex2_to_mem1_reg.destination_reg, cpu->ex2_to_mem1_reg.reg_operand1, cpu->ex2_to_mem1_reg.reg_operand2, cpu->ex2_to_mem1_reg.immediate_val, cpu->ex2_to_mem1_reg.result);
 
     cpu->mem1_to_mem2_reg.destination_reg = cpu->ex2_to_mem1_reg.destination_reg;
     cpu->mem1_to_mem2_reg.reg_operand1 = cpu->ex2_to_mem1_reg.reg_operand1;
+    cpu->mem1_to_mem2_reg.value_in_reg1 = cpu ->ex1_to_ex2_reg.value_in_reg1;
     cpu->mem1_to_mem2_reg.reg_operand2 = cpu->ex2_to_mem1_reg.reg_operand2;
     cpu->mem1_to_mem2_reg.opcode = cpu->ex2_to_mem1_reg.opcode;
     cpu->mem1_to_mem2_reg.immediate_val = cpu->ex2_to_mem1_reg.immediate_val;
     cpu->mem1_to_mem2_reg.result = cpu->ex2_to_mem1_reg.result;
+    cpu->mem1_to_mem2_reg.store_value = cpu->ex2_to_mem1_reg.store_value;
+
 
     cpu->mem1_to_mem2_reg.valid = 1;
     cpu->ex2_to_mem1_reg.valid = 0;
@@ -463,21 +489,46 @@ void MEM2_stage(Simple_Pipe* cpu) {
     if(!cpu->mem1_to_mem2_reg.valid) {
         return;
     }
-    printf("current instruction in MEM2 stage: 0x%02X %d %d %d %d %d\n", cpu->mem1_to_mem2_reg.opcode, cpu->mem1_to_mem2_reg.destination_reg, cpu->mem1_to_mem2_reg.reg_operand1, cpu->mem1_to_mem2_reg.reg_operand2, cpu->mem1_to_mem2_reg.immediate_val, cpu->mem1_to_mem2_reg.result);
+    //printf("current instruction in MEM2 stage: 0x%02X %d %d %d %d %d\n", cpu->mem1_to_mem2_reg.opcode, cpu->mem1_to_mem2_reg.destination_reg, cpu->mem1_to_mem2_reg.reg_operand1, cpu->mem1_to_mem2_reg.reg_operand2, cpu->mem1_to_mem2_reg.immediate_val, cpu->mem1_to_mem2_reg.result);
 
     unsigned char opcode = cpu->mem1_to_mem2_reg.opcode;
 
     if(opcode == 0x50 || opcode == 0x51) {
+        // result is the index of memory we need
         unsigned int address = cpu->mem1_to_mem2_reg.result;
+        //printf("0x5/51: address: %d\n", address);
 
-        unsigned int value = (cpu->memory[address]) | (cpu->memory[address + 1] << 8) | (cpu->memory[address + 2] << 16) | (cpu->memory[address + 3] << 24);
+        //unsigned int value = (cpu->memory[address]) | (cpu->memory[address + 1] << 8) | (cpu->memory[address + 2] << 16) | (cpu->memory[address + 3] << 24);
+        unsigned int value =
+        (cpu->memory[address]) |     // MSB
+        (cpu->memory[address + 1] << 8) |
+        (cpu->memory[address + 2] << 16)  |
+        (cpu->memory[address + 3] << 24); 
+        //printf("0x5/51: value: %u (0x%08X)\n", value, value);
         cpu->mem1_to_mem2_reg.result = value;
     }
-    else if(opcode == 0x60 || opcode == 0x61) {
+    else if(opcode == 0x60) {
+        // sd Rx, #imm: store Rx at immediate address
         unsigned int address = cpu->mem1_to_mem2_reg.result;
-        unsigned int value = cpu->mem1_to_mem2_reg.reg_operand1;
-
-        cpu->memory[address] = value & 0xFF;
+        unsigned int value = cpu->registers[cpu->mem1_to_mem2_reg.reg_operand1];
+        
+        //printf("Store value %u to address: %d\n", value, address);
+        
+        // Store 4 bytes (big-endian to match load)
+        cpu->memory[address] = (value) & 0xFF;
+        cpu->memory[address + 1] = (value >> 8) & 0xFF;
+        cpu->memory[address + 2] = (value >> 16) & 0xFF;
+        cpu->memory[address + 3] = (value >> 24) & 0xFF;
+    }
+    else if(opcode == 0x61) {
+        // sd Rx, Ry, Rz: store Rx at address (Ry + Rz)
+        unsigned int address = cpu->mem1_to_mem2_reg.result;
+        unsigned int value = cpu->mem1_to_mem2_reg.store_value;
+        
+        //printf("Store value %u to address: %d\n", value, address);
+        
+        // Store 4 bytes (big-endian to match load)
+        cpu->memory[address] = (value) & 0xFF;
         cpu->memory[address + 1] = (value >> 8) & 0xFF;
         cpu->memory[address + 2] = (value >> 16) & 0xFF;
         cpu->memory[address + 3] = (value >> 24) & 0xFF;
@@ -492,18 +543,14 @@ void MEM2_stage(Simple_Pipe* cpu) {
     cpu->mem2_to_wb_reg.reg_operand2 = cpu->mem1_to_mem2_reg.reg_operand2;
     cpu->mem2_to_wb_reg.immediate_val = cpu->mem1_to_mem2_reg.immediate_val;
     cpu->mem2_to_wb_reg.result = cpu->mem1_to_mem2_reg.result;
+    cpu->mem2_to_wb_reg.value_in_reg1 = cpu ->mem1_to_mem2_reg.value_in_reg1;
+
 
     cpu->mem2_to_wb_reg.valid = 1;
     cpu->mem1_to_mem2_reg.valid = 0;
 }
 
 void WB_stage(Simple_Pipe* cpu) {
-    // if(!cpu->ia_to_ex1_reg.valid) {
-    //     if(cpu->cycles > 3) {
-    //         printf("EX1 STALL\n");
-    //     }
-    //     return;
-    // }
 
     if(!cpu->mem2_to_wb_reg.valid) {
         return;
@@ -511,9 +558,9 @@ void WB_stage(Simple_Pipe* cpu) {
 
     if(cpu->cycles > 4 && !cpu->pull_no_more_instr) {
         //cpu->data_hazard_count++;
-        printf("WB STALL\n");
+        //printf("WB STALL\n");
     }
-    printf("current instruction in WB stage: 0x%02X %d %d %d %d %d\n", cpu->mem2_to_wb_reg.opcode, cpu->mem2_to_wb_reg.destination_reg, cpu->mem2_to_wb_reg.reg_operand1, cpu->mem2_to_wb_reg.reg_operand2, cpu->mem2_to_wb_reg.immediate_val, cpu->mem2_to_wb_reg.result);
+    //printf("current instruction in WB stage: 0x%02X %d %d %d %d %d\n", cpu->mem2_to_wb_reg.opcode, cpu->mem2_to_wb_reg.destination_reg, cpu->mem2_to_wb_reg.reg_operand1, cpu->mem2_to_wb_reg.reg_operand2, cpu->mem2_to_wb_reg.immediate_val, cpu->mem2_to_wb_reg.result);
 
     unsigned char opcode = cpu->mem2_to_wb_reg.opcode;
     if(!cpu->mem2_to_wb_reg.counted) {
@@ -532,7 +579,7 @@ void WB_stage(Simple_Pipe* cpu) {
     }
     if(cpu->mem2_to_wb_reg.destination_reg != -1) {
         cpu->registers[cpu->mem2_to_wb_reg.destination_reg] = cpu->mem2_to_wb_reg.result;
-        printf("new value in register: %d\n", cpu->registers[cpu->mem2_to_wb_reg.destination_reg]);
+        //printf("new value in register: %d\n", cpu->registers[cpu->mem2_to_wb_reg.destination_reg]);
     }
     if(cpu->mem2_to_wb_reg.opcode == 0x70) {
        cpu->program_ended = 1;
@@ -599,6 +646,7 @@ int pipeline_has_instructions(Simple_Pipe* cpu) {
            cpu->mem1_to_mem2_reg.valid ||
            cpu->mem2_to_wb_reg.valid;
 }
+
 int main(int argc, char *argv[]) {
     Simple_Pipe my_cpu;
     my_cpu.data_hazard_count = 0;
@@ -704,10 +752,13 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp);
+//     for (int i = 0; i <= 100; i++) {
+//     printf("memory[%d] = 0x%02X\n", i,my_cpu.memory[i]);
+// }   
 
     while(pipeline_has_instructions(&my_cpu) || my_cpu.cycles == 0) {
         my_cpu.cycles++;
-        printf("cycle number: %d----------\n", my_cpu.cycles);
+        //printf("cycle number: %d----------\n", my_cpu.cycles);
         WB_stage(&my_cpu);
         MEM2_stage(&my_cpu);
         MEM1_stage(&my_cpu);
@@ -716,7 +767,7 @@ int main(int argc, char *argv[]) {
         IA_stage(&my_cpu);
         ID_stage(&my_cpu);
         IF_stage(&my_cpu);
-        printf("\n\n");
+        //printf("\n\n");
     }
     my_cpu.execution_time = my_cpu.cycles;
     print_regs(my_cpu);

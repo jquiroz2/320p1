@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 
 #define REG_COUNT 32
 
@@ -24,48 +25,14 @@ typedef struct {
 	int destination_reg;
 	int reg_operand1;
 	int reg_operand2;
-	// int value_in_reg1;
-	// int value_in_reg2;
+	int value_in_reg1;
+	int value_in_reg2;
 	int immediate_val;
 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
 	int result;
+	int store_value;
 } IA_TO_EX1_reg;
 
-// typedef struct {
-// 	unsigned char opcode;
-// 	int destination_reg;
-// 	int reg_operand1;
-// 	int reg_operand2;
-// 	int immediate_val;
-// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-// 	int result;
-// } IA_TO_EX2_reg;
-
-// typedef struct {
-// 	unsigned char opcode;
-// 	int destination_reg;
-// 	int reg_operand1;
-// 	int reg_operand2;
-// 	int value_in_reg1;
-// 	int value_in_reg2;
-// 	int immediate_val;
-// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-// 	int result;
-// } EX1_TO_MEM1_reg;
-
-// typedef struct {
-// 	unsigned char opcode;
-// 	int destination_reg;
-// 	int reg_operand1;
-// 	int reg_operand2;
-// 	int value_in_reg1;
-// 	int value_in_reg2;
-// 	int immediate_val;
-// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-// 	int result;
-// 	int counted;
-// } EX1_TO_WB_reg;
-
 typedef struct {
 	unsigned char opcode;
 	int destination_reg;
@@ -76,18 +43,9 @@ typedef struct {
 	int immediate_val;
 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
 	int result;
+	int store_value;
 } EX1_TO_EX2_reg;
 
-// typedef struct {
-// 	unsigned char opcode;
-// 	int destination_reg;
-// 	int reg_operand1;
-// 	int reg_operand2;
-// 	int immediate_val;
-// 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
-// 	int result;
-// } EX2_TO_WB_reg;
-
 typedef struct {
 	unsigned char opcode;
 	int destination_reg;
@@ -98,6 +56,7 @@ typedef struct {
 	int immediate_val;
 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
 	int result;
+	int store_value;
 } EX2_TO_MEM1_reg;
 
 typedef struct {
@@ -105,9 +64,12 @@ typedef struct {
 	int destination_reg;
 	int reg_operand1;
 	int reg_operand2;
+	int value_in_reg1;
+	int value_in_reg2;
 	int immediate_val;
 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
 	int result;
+	int store_value;
 } MEM1_TO_MEM2_reg;
 
 typedef struct {
@@ -115,9 +77,12 @@ typedef struct {
 	int destination_reg;
 	int reg_operand1;
 	int reg_operand2;
+	int value_in_reg1;
+	int value_in_reg2;
 	int immediate_val;
 	int valid; // 1 = there is a real instruction to process, 0 = empty/bubble
 	int result;
+	int store_value;
 	int counted;
 } MEM2_TO_WB_reg;
 
